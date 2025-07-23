@@ -84,7 +84,8 @@
                   label="画像ファイル"
                   accept="image/*"
                   prepend-icon="mdi-camera"
-                  @change="onFileChange"
+                  @update:model-value="onFileChange"
+                  clearable
                 ></v-file-input>
               </v-col>
               <v-col cols="12" md="6">
@@ -234,8 +235,16 @@ const close = () => {
   }, 300)
 }
 
-const onFileChange = (files: File[]) => {
-  selectedFile.value = files
+const onFileChange = (files: File[] | File | null) => {
+  if (files) {
+    if (Array.isArray(files)) {
+      selectedFile.value = files
+    } else {
+      selectedFile.value = [files]
+    }
+  } else {
+    selectedFile.value = []
+  }
 }
 
 const save = async () => {
@@ -243,7 +252,7 @@ const save = async () => {
   try {
     let filePath = editedItem.value.filePath || ''
     
-    if (selectedFile.value.length > 0) {
+    if (selectedFile.value && selectedFile.value.length > 0) {
       const uploadResponse = await uploadApi.uploadFile(selectedFile.value[0])
       filePath = uploadResponse.data.filePath
     }
