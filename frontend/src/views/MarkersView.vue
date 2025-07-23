@@ -80,7 +80,7 @@
           mdi-delete
         </v-icon>
       </template>
-    </v-data-table></old_str>
+    </v-data-table>
 
 
 
