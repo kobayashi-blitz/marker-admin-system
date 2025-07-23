@@ -19,6 +19,7 @@
       class="elevation-1"
       :items-per-page="10"
       no-data-text="データがありません"
+      item-value="id"
     >
       <template v-slot:item.name="{ item }">
         {{ item.name || '-' }}
@@ -26,33 +27,21 @@
 
       <template v-slot:item.filePath="{ item }">
         <div class="d-flex justify-center" style="width: 80px;">
-          <v-img 
+          <img 
             v-if="item.filePath && item.filePath.trim() !== ''" 
             :src="getImageUrl(item.filePath)"
             width="50"
             height="50"
-            cover
-            class="rounded border"
-            :eager="true"
-            :transition="false"
-          >
-            <template v-slot:placeholder>
-              <div class="d-flex align-center justify-center fill-height">
-                <v-progress-circular
-                  color="grey-lighten-4"
-                  indeterminate
-                  size="20"
-                ></v-progress-circular>
-              </div>
-            </template>
-            <template v-slot:error>
-              <div class="d-flex align-center justify-center fill-height">
-                <v-icon color="grey-lighten-1" size="20">mdi-image-broken</v-icon>
-              </div>
-            </template>
-          </v-img>
+            style="object-fit: cover; border-radius: 4px; border: 1px solid #ddd;"
+            @error="handleImageError"
+            @load="handleImageLoad"
+          />
           <span v-else>-</span>
         </div>
+      </template>
+
+      <template v-slot:item.category="{ item }">
+        {{ item.category || '-' }}
       </template>
 
       <template v-slot:item.description="{ item }">
@@ -239,26 +228,7 @@ const fetchMarkers = async () => {
   loading.value = true
   try {
     const response = await markerApi.getAll()
-    // Pre-compute image URLs to avoid Vuetify truncation
-    markers.value = response.data.map(marker => {
-      const imageUrl = marker.filePath ? getImageUrl(marker.filePath) : null
-      console.log('DEBUG mapping marker:', { id: marker.id, filePath: marker.filePath, imageUrl })
-      return {
-        ...marker,
-        imageUrl
-      }
-    })
-    console.log('DEBUG fetchMarkers - final markers with details:')
-    markers.value.forEach((marker, index) => {
-      console.log(`Marker ${index}:`, {
-        id: marker.id,
-        filePath: marker.filePath,
-        imageUrl: marker.imageUrl,
-        hasImageUrl: !!marker.imageUrl,
-        imageUrlType: typeof marker.imageUrl,
-        imageUrlLength: marker.imageUrl ? marker.imageUrl.length : 0
-      })
-    })
+    markers.value = response.data
   } catch (error) {
     console.error('Failed to fetch markers:', error)
   } finally {
