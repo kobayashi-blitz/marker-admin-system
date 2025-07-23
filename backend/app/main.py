@@ -98,8 +98,7 @@ async def get_notification(
 @app.post("/api/notifications", response_model=models.NotificationMasterResponse)
 async def create_notification(
     notification: models.NotificationMasterCreate,
-    db: Session = Depends(database.get_db),
-    current_user: dict = Depends(firebase_config.get_current_user)
+    db: Session = Depends(database.get_db)
 ):
     return crud.create_notification_master(db, notification)
 
@@ -107,8 +106,7 @@ async def create_notification(
 async def update_notification(
     notification_id: str,
     notification: models.NotificationMasterUpdate,
-    db: Session = Depends(database.get_db),
-    current_user: dict = Depends(firebase_config.get_current_user)
+    db: Session = Depends(database.get_db)
 ):
     updated_notification = crud.update_notification_master(db, notification_id, notification)
     if not updated_notification:
@@ -118,8 +116,7 @@ async def update_notification(
 @app.delete("/api/notifications/{notification_id}", response_model=models.NotificationMasterResponse)
 async def delete_notification(
     notification_id: str,
-    db: Session = Depends(database.get_db),
-    current_user: dict = Depends(firebase_config.get_current_user)
+    db: Session = Depends(database.get_db)
 ):
     deleted_notification = crud.delete_notification_master(db, notification_id)
     if not deleted_notification:
@@ -148,8 +145,7 @@ async def get_user(
 @app.post("/api/users", response_model=models.UsersResponse)
 async def create_user(
     user: models.UsersCreate,
-    db: Session = Depends(database.get_db),
-    current_user: dict = Depends(firebase_config.get_current_user)
+    db: Session = Depends(database.get_db)
 ):
     return crud.create_user(db, user)
 
@@ -157,8 +153,7 @@ async def create_user(
 async def update_user(
     user_id: str,
     user: models.UsersUpdate,
-    db: Session = Depends(database.get_db),
-    current_user: dict = Depends(firebase_config.get_current_user)
+    db: Session = Depends(database.get_db)
 ):
     updated_user = crud.update_user(db, user_id, user)
     if not updated_user:
@@ -168,8 +163,7 @@ async def update_user(
 @app.delete("/api/users/{user_id}", response_model=models.UsersResponse)
 async def delete_user(
     user_id: str,
-    db: Session = Depends(database.get_db),
-    current_user: dict = Depends(firebase_config.get_current_user)
+    db: Session = Depends(database.get_db)
 ):
     deleted_user = crud.delete_user(db, user_id)
     if not deleted_user:
