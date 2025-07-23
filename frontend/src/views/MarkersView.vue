@@ -17,26 +17,52 @@
       :items="markers"
       :loading="loading"
       class="elevation-1"
+      :items-per-page="10"
+      no-data-text="データがありません"
     >
+      <template v-slot:item.name="{ item }">
+        {{ item.name || '-' }}
+      </template>
+
+      <template v-slot:item.filePath="{ item }">
+        <div class="d-flex justify-center" style="width: 80px;">
+          <v-img 
+            v-if="item.filePath && item.filePath.trim() !== ''" 
+            :src="getImageUrl(item.filePath)"
+            width="50"
+            height="50"
+            cover
+            class="rounded border"
+            :eager="true"
+            :transition="false"
+          >
+            <template v-slot:placeholder>
+              <div class="d-flex align-center justify-center fill-height">
+                <v-progress-circular
+                  color="grey-lighten-4"
+                  indeterminate
+                  size="20"
+                ></v-progress-circular>
+              </div>
+            </template>
+            <template v-slot:error>
+              <div class="d-flex align-center justify-center fill-height">
+                <v-icon color="grey-lighten-1" size="20">mdi-image-broken</v-icon>
+              </div>
+            </template>
+          </v-img>
+          <span v-else>-</span>
+        </div>
+      </template>
+
+      <template v-slot:item.description="{ item }">
+        {{ item.description || '-' }}
+      </template>
+
       <template v-slot:item.isVisible="{ item }">
         <v-chip :color="item.isVisible ? 'success' : 'error'">
           {{ item.isVisible ? '表示' : '非表示' }}
         </v-chip>
-      </template>
-      
-      <template v-slot:item.filePath="{ item }">
-        <div v-if="item.filePath && item.filePath.trim() !== ''" style="width: 50px; height: 50px; position: relative;">
-          <img
-            :src="getImageUrl(item.filePath)"
-            width="50"
-            height="50"
-            style="object-fit: cover; border-radius: 4px; position: absolute; top: 0; left: 0;"
-            :alt="item.name"
-            @error="handleImageError"
-            @load="handleImageLoad"
-          />
-        </div>
-        <span v-else>-</span>
       </template>
 
       <template v-slot:item.actions="{ item }">
@@ -54,7 +80,10 @@
           mdi-delete
         </v-icon>
       </template>
-    </v-data-table>
+    </v-data-table></old_str>
+
+
+
 
     <!-- Create/Edit Dialog -->
     <v-dialog v-model="dialog" max-width="600px">
@@ -198,7 +227,7 @@ const categoryOptions = [
 const headers = [
   { title: 'ID', key: 'id' },
   { title: '名前', key: 'name' },
-  { title: '画像', key: 'filePath', sortable: false, width: '80px', cellProps: { style: 'white-space: nowrap; overflow: visible;' } },
+  { title: '画像', key: 'filePath', sortable: false, width: '80px' },
   { title: 'カテゴリ', key: 'category' },
   { title: '表示', key: 'isVisible' },
   { title: '表示順', key: 'displayOrder' },
@@ -210,7 +239,26 @@ const fetchMarkers = async () => {
   loading.value = true
   try {
     const response = await markerApi.getAll()
-    markers.value = response.data
+    // Pre-compute image URLs to avoid Vuetify truncation
+    markers.value = response.data.map(marker => {
+      const imageUrl = marker.filePath ? getImageUrl(marker.filePath) : null
+      console.log('DEBUG mapping marker:', { id: marker.id, filePath: marker.filePath, imageUrl })
+      return {
+        ...marker,
+        imageUrl
+      }
+    })
+    console.log('DEBUG fetchMarkers - final markers with details:')
+    markers.value.forEach((marker, index) => {
+      console.log(`Marker ${index}:`, {
+        id: marker.id,
+        filePath: marker.filePath,
+        imageUrl: marker.imageUrl,
+        hasImageUrl: !!marker.imageUrl,
+        imageUrlType: typeof marker.imageUrl,
+        imageUrlLength: marker.imageUrl ? marker.imageUrl.length : 0
+      })
+    })
   } catch (error) {
     console.error('Failed to fetch markers:', error)
   } finally {
