@@ -25,13 +25,24 @@
       </template>
       
       <template v-slot:item.filePath="{ item }">
-        <v-img
-          v-if="item.filePath"
-          :src="getImageUrl(item.filePath)"
-          width="50"
-          height="50"
-          class="rounded"
-        ></v-img>
+        <div v-if="item.filePath && item.filePath.trim() !== ''" class="d-flex justify-center">
+          <v-img
+            :src="getImageUrl(item.filePath)"
+            width="50"
+            height="50"
+            class="rounded"
+            cover
+            :lazy-src="getImageUrl(item.filePath)"
+            aspect-ratio="1"
+          >
+            <template v-slot:placeholder>
+              <v-row class="fill-height ma-0" align="center" justify="center">
+                <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
+              </v-row>
+            </template>
+          </v-img>
+        </div>
+        <span v-else>-</span>
       </template>
 
       <template v-slot:item.actions="{ item }">
@@ -84,7 +95,7 @@
                   label="画像ファイル"
                   accept="image/*"
                   prepend-icon="mdi-camera"
-                  @update:model-value="onFileChange"
+                  @change="onFileChange"
                   clearable
                 ></v-file-input>
               </v-col>
@@ -235,13 +246,10 @@ const close = () => {
   }, 300)
 }
 
-const onFileChange = (files: File[] | File | null) => {
-  if (files) {
-    if (Array.isArray(files)) {
-      selectedFile.value = files
-    } else {
-      selectedFile.value = [files]
-    }
+const onFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target && target.files && target.files.length > 0) {
+    selectedFile.value = Array.from(target.files)
   } else {
     selectedFile.value = []
   }
@@ -295,7 +303,7 @@ const getImageUrl = (filePath: string) => {
   if (filePath.startsWith('http')) {
     return filePath
   }
-  return `http://localhost:8000${filePath}`
+  return `http://localhost:8001${filePath}`
 }
 
 onMounted(() => {
