@@ -4,9 +4,10 @@ from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.dialects.postgresql import UUID
 import enum
 import uuid
+import os
 from typing import Generator
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./mapbox_management.db"
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mapbox_management.db")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 
