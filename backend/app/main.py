@@ -182,8 +182,10 @@ async def upload_file(
     unique_filename = f"{timestamp}_{file.filename}"
     file_path = f"uploads/{unique_filename}"
     
+    file_content = await file.read()
+    
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        buffer.write(file_content)
     
     return {"filePath": f"/uploads/{unique_filename}"}
 

@@ -80,7 +80,7 @@
           mdi-delete
         </v-icon>
       </template>
-    </v-data-table></old_str>
+    </v-data-table>
 
 
 
@@ -181,12 +181,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { markerApi, uploadApi } from '../services/api'
 import type { MarkerMaster } from '../types'
 
 const markers = ref<MarkerMaster[]>([])
 const loading = ref(false)
+
+const markersWithImageUrls = computed(() => {
+  return markers.value.map(marker => ({
+    ...marker,
+    imageUrl: marker.filePath ? getImageUrl(marker.filePath) : null
+  }))
+})
 const dialog = ref(false)
 const deleteDialog = ref(false)
 const saving = ref(false)
@@ -342,16 +349,20 @@ const deleteItemConfirm = async () => {
 }
 
 const getImageUrl = (filePath: string) => {
-  console.log('DEBUG getImageUrl - input filePath:', filePath, 'length:', filePath.length)
   if (filePath.startsWith('http')) {
     return filePath
   }
-  // Extract filename from filePath and use API endpoint
-  const filename = filePath.replace('/uploads/', '')
-  console.log('DEBUG getImageUrl - extracted filename:', filename, 'length:', filename.length)
-  const url = `http://localhost:8001/api/images/${filename}`
-  console.log('DEBUG getImageUrl - generated URL:', url)
-  return url
+  return `http://localhost:8001${filePath}`
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.error('Image failed to load:', img.src)
+}
+
+const handleImageLoad = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.log('Image loaded successfully:', img.src)
 }
 
 onMounted(() => {
