@@ -25,22 +25,16 @@
       </template>
       
       <template v-slot:item.filePath="{ item }">
-        <div v-if="item.filePath && item.filePath.trim() !== ''" class="d-flex justify-center">
-          <v-img
+        <div v-if="item.filePath && item.filePath.trim() !== ''" style="width: 50px; height: 50px; position: relative;">
+          <img
             :src="getImageUrl(item.filePath)"
             width="50"
             height="50"
-            class="rounded"
-            cover
-            :lazy-src="getImageUrl(item.filePath)"
-            aspect-ratio="1"
-          >
-            <template v-slot:placeholder>
-              <v-row class="fill-height ma-0" align="center" justify="center">
-                <v-progress-circular indeterminate color="grey lighten-5"></v-progress-circular>
-              </v-row>
-            </template>
-          </v-img>
+            style="object-fit: cover; border-radius: 4px; position: absolute; top: 0; left: 0;"
+            :alt="item.name"
+            @error="handleImageError"
+            @load="handleImageLoad"
+          />
         </div>
         <span v-else>-</span>
       </template>
@@ -158,12 +152,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { markerApi, uploadApi } from '../services/api'
 import type { MarkerMaster } from '../types'
 
 const markers = ref<MarkerMaster[]>([])
 const loading = ref(false)
+
+const markersWithImageUrls = computed(() => {
+  return markers.value.map(marker => ({
+    ...marker,
+    imageUrl: marker.filePath ? getImageUrl(marker.filePath) : null
+  }))
+})
 const dialog = ref(false)
 const deleteDialog = ref(false)
 const saving = ref(false)
@@ -197,7 +198,7 @@ const categoryOptions = [
 const headers = [
   { title: 'ID', key: 'id' },
   { title: '名前', key: 'name' },
-  { title: '画像', key: 'filePath', sortable: false },
+  { title: '画像', key: 'filePath', sortable: false, width: '80px', cellProps: { style: 'white-space: nowrap; overflow: visible;' } },
   { title: 'カテゴリ', key: 'category' },
   { title: '表示', key: 'isVisible' },
   { title: '表示順', key: 'displayOrder' },
@@ -304,6 +305,16 @@ const getImageUrl = (filePath: string) => {
     return filePath
   }
   return `http://localhost:8001${filePath}`
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.error('Image failed to load:', img.src)
+}
+
+const handleImageLoad = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.log('Image loaded successfully:', img.src)
 }
 
 onMounted(() => {
