@@ -83,62 +83,64 @@
 
         <v-card-text>
           <v-container>
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="editedItem.name"
-                  label="名前*"
-                  required
-                  :rules="[v => !!v || '名前は必須です']"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="editedItem.category"
-                  :items="categoryOptions"
-                  label="カテゴリ*"
-                  required
-                  :rules="[v => !!v || 'カテゴリは必須です']"
-                ></v-select>
-              </v-col>
-              <v-col cols="12">
-                <v-file-input
-                  v-model="selectedFile"
-                  label="画像ファイル"
-                  accept="image/*"
-                  prepend-icon="mdi-camera"
-                  @change="onFileChange"
-                  clearable
-                ></v-file-input>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model.number="editedItem.displayOrder"
-                  label="表示順"
-                  type="number"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-switch
-                  v-model="editedItem.isVisible"
-                  label="表示"
-                ></v-switch>
-              </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="editedItem.description"
-                  label="説明*"
-                  required
-                  :rules="[v => !!v || '説明は必須です']"
-                ></v-textarea>
-              </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="editedItem.memo"
-                  label="メモ"
-                ></v-textarea>
-              </v-col>
-            </v-row>
+            <v-form ref="form" v-model="valid">
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="editedItem.name"
+                    label="名前*"
+                    required
+                    :rules="[v => !!v || '名前は必須です']"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-select
+                    v-model="editedItem.category"
+                    :items="categoryOptions"
+                    label="カテゴリ*"
+                    required
+                    :rules="[v => !!v || 'カテゴリは必須です']"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <v-file-input
+                    v-model="selectedFile"
+                    label="画像ファイル"
+                    accept="image/*"
+                    prepend-icon="mdi-camera"
+                    @change="onFileChange"
+                    clearable
+                  ></v-file-input>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model.number="editedItem.displayOrder"
+                    label="表示順"
+                    type="number"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-switch
+                    v-model="editedItem.isVisible"
+                    label="表示"
+                  ></v-switch>
+                </v-col>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="editedItem.description"
+                    label="説明*"
+                    required
+                    :rules="[v => !!v || '説明は必須です']"
+                  ></v-textarea>
+                </v-col>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="editedItem.memo"
+                    label="メモ"
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+            </v-form>
           </v-container>
         </v-card-text>
 
@@ -174,6 +176,8 @@ import { ref, computed, onMounted } from 'vue'
 import { markerApi, uploadApi } from '../services/api'
 import type { MarkerMaster } from '../types'
 
+const form = ref()
+
 const markers = ref<MarkerMaster[]>([])
 const loading = ref(false)
 
@@ -189,6 +193,7 @@ const saving = ref(false)
 const deleting = ref(false)
 const editedIndex = ref(-1)
 const selectedFile = ref<File[]>([])
+const valid = ref(false)
 
 const defaultItem: Partial<MarkerMaster> = {
   name: '',
@@ -275,6 +280,21 @@ const onFileChange = (event: Event) => {
 }
 
 const save = async () => {
+  if (!editedItem.value.name || !editedItem.value.name.trim()) {
+    console.error('Validation failed: Name is required');
+    return;
+  }
+  
+  if (!editedItem.value.category) {
+    console.error('Validation failed: Category is required');
+    return;
+  }
+  
+  if (!editedItem.value.description || !editedItem.value.description.trim()) {
+    console.error('Validation failed: Description is required');
+    return;
+  }
+
   saving.value = true
   try {
     let filePath = editedItem.value.filePath || ''
