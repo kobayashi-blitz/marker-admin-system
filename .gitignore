@@ -1,0 +1,30 @@
+
+
+# macOS
+.DS_Store
+
+# 共通
+.env
+*.log
+*.lock
+
+# VSCodeなどエディタ
+.vscode/
+
+# --- frontend (Vue + Vite) ---
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+
+# --- backend (Python + Poetry + Firebase) ---
+/backend/__pycache__/
+/backend/venv/
+/backend/.env
+/backend/mapbox_management.db
+/backend/firebase-service-account.json
+
+# Poetryや仮想環境のキャッシュ
+poetry.lock
+
+# ローカル設定
+.devdbrc
