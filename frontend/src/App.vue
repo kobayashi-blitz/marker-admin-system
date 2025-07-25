@@ -1,7 +1,10 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" dark>
-      <v-app-bar-title>Mapbox Management System</v-app-bar-title>
+      <v-btn icon @click="toggleDrawer">
+        <v-icon>mdi-menu</v-icon>
+      </v-btn>
+      <v-app-bar-title>ナカマーカー管理システム</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn @click="logout" variant="text">
         <v-icon>mdi-logout</v-icon>
@@ -9,14 +12,19 @@
       </v-btn>
     </v-app-bar>
 
-    <v-navigation-drawer app permanent>
+    <v-navigation-drawer
+      app
+      v-model="drawerOpen"
+      :mini-variant="!drawerOpen"
+      permanent
+    >
       <v-list>
         <v-list-item
           v-for="item in menuItems"
           :key="item.title"
           :to="item.route"
           :prepend-icon="item.icon"
-          :title="item.title"
+          :title="drawerOpen ? item.title : ''"
         ></v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -54,6 +62,12 @@ const menuItems = ref([
     route: '/users'
   }
 ])
+
+const drawerOpen = ref(false) // デフォルトで閉じておく
+
+const toggleDrawer = () => {
+  drawerOpen.value = !drawerOpen.value
+}
 
 const logout = async () => {
   await authStore.logout()

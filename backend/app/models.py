@@ -89,7 +89,6 @@ class UsersBase(BaseModel):
     user_type: str = "USER"
 
 class UsersCreate(UsersBase):
-    id: str  # Firebase UID
     created_at: Optional[int] = None
     updated_at: Optional[int] = None
 
@@ -102,7 +101,7 @@ class UsersUpdate(BaseModel):
     user_type: Optional[str] = None
 
 class UsersResponse(UsersBase):
-    id: str
+    id: int
     created_at: int
     updated_at: int
     is_deleted: bool

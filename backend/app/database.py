@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Double, BigInteger, ForeignKey, Enum as SQLEnum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
-from sqlalchemy.dialects.postgresql import UUID
+# from sqlalchemy.dialects.postgresql import UUID
 import enum
 import uuid
 import os
@@ -61,7 +61,7 @@ class NotificationMaster(Base):
 class Users(Base):
     __tablename__ = "users"
     
-    id = Column(String, primary_key=True)  # Firebase UID
+    id = Column(Integer, primary_key=True, autoincrement=True)  # 自動採番
     username = Column(String, nullable=False)
     email = Column(String, nullable=True)
     emailVerified = Column(Boolean, default=False)
@@ -76,7 +76,7 @@ class UserDownloadedMarkers(Base):
     __tablename__ = "user_downloaded_markers"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     marker_id = Column(Integer, ForeignKey("marker_master.id"), nullable=False)
     downloaded_at = Column(BigInteger, nullable=False)
 
@@ -84,7 +84,7 @@ class UserRegisteredMarkers(Base):
     __tablename__ = "user_registered_markers"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     marker_id = Column(Integer, ForeignKey("marker_master.id"), nullable=False)
     latitude = Column(Double, nullable=False)
     longitude = Column(Double, nullable=False)
@@ -95,7 +95,7 @@ class UserFunctionMarkers(Base):
     __tablename__ = "user_function_markers"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     marker_id = Column(Integer, ForeignKey("marker_master.id"), nullable=False)
     latitude = Column(Double, nullable=False)
     longitude = Column(Double, nullable=False)

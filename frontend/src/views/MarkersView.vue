@@ -1,9 +1,7 @@
 <template>
   <div>
     <v-row class="mb-4">
-      <v-col>
-        <h1>マーカーマスタ</h1>
-      </v-col>
+      
       <v-col cols="auto">
         <v-btn color="primary" @click="openCreateDialog">
           <v-icon left>mdi-plus</v-icon>
@@ -20,6 +18,7 @@
       :items-per-page="10"
       no-data-text="データがありません"
       item-value="id"
+      :sort-by="[{ key: 'published_at', order: 'desc' }]"
     >
       <template v-slot:item.name="{ item }">
         {{ item.name || '-' }}
@@ -41,7 +40,17 @@
       </template>
 
       <template v-slot:item.category="{ item }">
-        {{ item.category || '-' }}
+        {{
+          item.category === 'REGISTER' ? '登録' :
+          item.category === 'SEARCH' ? '検索' :
+          item.category === 'FUNCTION' ? '機能' :
+          item.category === 'OTHER' ? 'その他' :
+          '-'
+        }}
+      </template>
+
+      <template v-slot:item.published_at="{ item }">
+        {{ formatDate(item.published_at) }}
       </template>
 
       <template v-slot:item.description="{ item }">
@@ -112,18 +121,12 @@
                     clearable
                   ></v-file-input>
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12">
                   <v-text-field
-                    v-model.number="editedItem.displayOrder"
-                    label="表示順"
-                    type="number"
+                    v-model="editedItem.published_at"
+                    label="配信日"
+                    type="datetime-local"
                   ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-switch
-                    v-model="editedItem.isVisible"
-                    label="表示"
-                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
                   <v-textarea
@@ -131,12 +134,6 @@
                     label="説明*"
                     required
                     :rules="[v => !!v || '説明は必須です']"
-                  ></v-textarea>
-                </v-col>
-                <v-col cols="12">
-                  <v-textarea
-                    v-model="editedItem.memo"
-                    label="メモ"
                   ></v-textarea>
                 </v-col>
               </v-row>
@@ -206,7 +203,8 @@ const defaultItem: Partial<MarkerMaster> = {
   functionType: '',
   paramJson: '',
   isUnlocked: false,
-  searchKeyword: ''
+  searchKeyword: '',
+  published_at: undefined
 }
 
 const editedItem = ref<Partial<MarkerMaster>>({ ...defaultItem })
@@ -223,11 +221,22 @@ const headers = [
   { title: '名前', key: 'name' },
   { title: '画像', key: 'filePath', sortable: false, width: '80px' },
   { title: 'カテゴリ', key: 'category' },
-  { title: '表示', key: 'isVisible' },
-  { title: '表示順', key: 'displayOrder' },
+  // { title: '表示', key: 'isVisible' },
+  { title: '配信日', key: 'published_at' },
   { title: '説明', key: 'description' },
   { title: 'アクション', key: 'actions', sortable: false }
 ]
+
+const formatDate = (timestamp: number | undefined) => {
+  if (!timestamp) return '-';
+  const date = new Date(timestamp);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
+};
 
 const fetchMarkers = async () => {
   loading.value = true
@@ -295,6 +304,7 @@ const save = async () => {
     return;
   }
 
+
   saving.value = true
   try {
     let filePath = editedItem.value.filePath || ''
@@ -304,10 +314,16 @@ const save = async () => {
       filePath = uploadResponse.data.filePath
     }
 
+    const publishedAtTimestamp = editedItem.value.published_at
+      ? (typeof editedItem.value.published_at === 'string'
+        ? new Date(editedItem.value.published_at).getTime()
+        : editedItem.value.published_at)
+      : Date.now();
+
     const markerData = {
       ...editedItem.value,
       filePath,
-      published_at: Date.now()
+      published_at: publishedAtTimestamp || Date.now()
     }
 
     if (editedIndex.value > -1) {
@@ -342,7 +358,7 @@ const getImageUrl = (filePath: string) => {
   if (filePath.startsWith('http')) {
     return filePath
   }
-  return `http://localhost:8001${filePath}`
+  return `http://localhost:8000${filePath}`
 }
 
 const handleImageError = (event: Event) => {

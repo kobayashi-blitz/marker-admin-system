@@ -1,9 +1,7 @@
 <template>
   <div>
     <v-row class="mb-4">
-      <v-col>
-        <h1>ユーザー一覧</h1>
-      </v-col>
+      
       <v-col cols="auto">
         <v-btn color="primary" @click="openCreateDialog">
           <v-icon left>mdi-plus</v-icon>
@@ -59,15 +57,6 @@
             <v-row>
               <v-col cols="12">
                 <v-text-field
-                  v-model="editedItem.id"
-                  label="Firebase UID*"
-                  required
-                  :disabled="editedIndex !== -1"
-                  :error-messages="idErrors"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
                   v-model="editedItem.username"
                   label="ユーザー名*"
                   required
@@ -92,12 +81,14 @@
                 <v-switch
                   v-model="editedItem.emailVerified"
                   label="メール認証済み"
+                  color="success"
                 ></v-switch>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-switch
                   v-model="editedItem.is_registered"
                   label="登録済み"
+                  color="success"
                 ></v-switch>
               </v-col>
               <v-col cols="12">
@@ -154,7 +145,7 @@ const editedItem = ref<Partial<User>>({})
 const itemToDelete = ref<User | null>(null)
 
 const headers = [
-  { title: 'Firebase UID', key: 'id' },
+  { title: 'ID', key: 'id' },
   { title: 'ユーザー名', key: 'username' },
   { title: 'メール', key: 'email' },
   { title: 'メール認証', key: 'emailVerified' },
@@ -168,7 +159,6 @@ const userTypes = [
 ]
 
 const defaultItem: Partial<User> = {
-  id: '',
   username: '',
   email: '',
   emailVerified: false,
@@ -176,13 +166,6 @@ const defaultItem: Partial<User> = {
   is_registered: true,
   user_type: 'USER'
 }
-
-const idErrors = computed(() => {
-  const errors: string[] = []
-  if (!editedItem.value.id) errors.push('Firebase UIDは必須です')
-  if (editedItem.value.id && editedItem.value.id.length < 10) errors.push('Firebase UIDは10文字以上で入力してください')
-  return errors
-})
 
 const usernameErrors = computed(() => {
   const errors: string[] = []
@@ -200,8 +183,7 @@ const emailErrors = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return idErrors.value.length === 0 && 
-         usernameErrors.value.length === 0 && 
+  return usernameErrors.value.length === 0 && 
          emailErrors.value.length === 0
 })
 

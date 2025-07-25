@@ -1,9 +1,7 @@
 <template>
   <div>
     <v-row class="mb-4">
-      <v-col>
-        <h1>通知マスタ</h1>
-      </v-col>
+      
       <v-col cols="auto">
         <v-btn color="primary" @click="openCreateDialog">
           <v-icon left>mdi-plus</v-icon>
@@ -18,6 +16,12 @@
       :loading="loading"
       class="elevation-1"
     >
+      <template v-slot:item.scheduled_at="{ item }">
+        <span>
+          {{ formatDate(item.scheduled_at) }}
+        </span>
+      </template>
+
       <template v-slot:item.is_push="{ item }">
         <v-chip :color="item.is_push ? 'success' : 'error'">
           {{ item.is_push ? 'プッシュ通知' : '通常通知' }}
@@ -57,6 +61,14 @@
         <v-card-text>
           <v-container>
             <v-row>
+              <v-col cols="12" v-if="editedIndex !== -1">
+                <v-text-field
+                  v-model="editedItem.id"
+                  label="通知ID"
+                  readonly
+                  variant="underlined"
+                ></v-text-field>
+              </v-col>
               <v-col cols="12">
                 <v-text-field
                   v-model="editedItem.title"
@@ -74,6 +86,20 @@
                 ></v-textarea>
               </v-col>
               <v-col cols="12" sm="6">
+                <v-switch
+                  v-model="editedItem.is_push"
+                  label="プッシュ通知"
+                  :color="editedItem.is_push ? 'success' : 'error'"
+                ></v-switch>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-switch
+                  v-model="editedItem.isUserVisible"
+                  label="ユーザーに表示"
+                  :color="editedItem.isUserVisible ? 'success' : 'error'"
+                ></v-switch>
+              </v-col>
+              <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="scheduledDateString"
                   label="配信予定日時*"
@@ -81,18 +107,6 @@
                   required
                   :error-messages="dateErrors"
                 ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-switch
-                  v-model="editedItem.is_push"
-                  label="プッシュ通知"
-                ></v-switch>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-switch
-                  v-model="editedItem.isUserVisible"
-                  label="ユーザーに表示"
-                ></v-switch>
               </v-col>
             </v-row>
           </v-container>
@@ -142,13 +156,25 @@ const itemToDelete = ref<NotificationMaster | null>(null)
 const scheduledDateString = ref('')
 
 const headers = [
-  { title: 'ID', key: 'id' },
   { title: 'タイトル', key: 'title' },
   { title: 'メッセージ', key: 'message' },
+  { title: '配信予定日', key: 'scheduled_at' },
   { title: 'プッシュ', key: 'is_push' },
   { title: '表示', key: 'isUserVisible' },
   { title: 'アクション', key: 'actions', sortable: false }
 ]
+
+function formatDate(timestamp: number) {
+  if (!timestamp) return ''
+  const date = new Date(timestamp)
+  return date.toLocaleString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
 const defaultItem: Partial<NotificationMaster> = {
   title: '',
