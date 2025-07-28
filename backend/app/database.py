@@ -62,6 +62,7 @@ class Users(Base):
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, autoincrement=True)  # 自動採番
+    uid = Column(String, nullable=True, unique=True)
     username = Column(String, nullable=False)
     email = Column(String, nullable=True)
     emailVerified = Column(Boolean, default=False)

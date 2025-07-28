@@ -82,6 +82,7 @@ class NotificationMasterResponse(NotificationMasterBase):
 
 class UsersBase(BaseModel):
     username: str
+    uid: Optional[str] = None
     email: Optional[str] = None
     emailVerified: bool = False
     fcm_token: Optional[str] = None
@@ -94,6 +95,7 @@ class UsersCreate(UsersBase):
 
 class UsersUpdate(BaseModel):
     username: Optional[str] = None
+    uid: Optional[str] = None
     email: Optional[str] = None
     emailVerified: Optional[bool] = None
     fcm_token: Optional[str] = None
