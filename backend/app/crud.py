@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 from . import database
 from . import models
 import time
@@ -9,6 +9,7 @@ def get_marker_masters(db: Session, skip: int = 0, limit: int = 100, include_del
     query = db.query(database.MarkerMaster)
     if not include_deleted:
         query = query.filter(database.MarkerMaster.is_deleted == False)
+    query = query.order_by(desc(database.MarkerMaster.published_at))
     return query.offset(skip).limit(limit).all()
 
 def get_marker_master(db: Session, marker_id: int):
@@ -50,6 +51,7 @@ def get_notification_masters(db: Session, skip: int = 0, limit: int = 100, inclu
     query = db.query(database.NotificationMaster)
     if not include_deleted:
         query = query.filter(database.NotificationMaster.is_deleted == False)
+    query = query.order_by(desc(database.NotificationMaster.created_at))
     return query.offset(skip).limit(limit).all()
 
 def get_notification_master(db: Session, notification_id: str):
@@ -91,11 +93,21 @@ def get_users(db: Session, skip: int = 0, limit: int = 100, include_deleted: boo
     query = db.query(database.Users)
     if not include_deleted:
         query = query.filter(database.Users.is_deleted == False)
+    query = query.order_by(desc(database.Users.created_at))
     return query.offset(skip).limit(limit).all()
 
 def get_user(db: Session, user_id: str):
     return db.query(database.Users).filter(
         and_(database.Users.id == user_id, database.Users.is_deleted == False)
+    ).first()
+
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(database.Users).filter(
+        and_(
+            database.Users.username == username,
+            database.Users.is_deleted == False
+        )
     ).first()
 
 def create_user(db: Session, user: models.UsersCreate):

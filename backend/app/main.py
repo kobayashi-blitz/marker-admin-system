@@ -134,8 +134,8 @@ async def get_users(
 @app.get("/api/users/{user_id}", response_model=models.UsersResponse)
 async def get_user(
     user_id: str,
-    db: Session = Depends(database.get_db),
-    current_user: dict = Depends(firebase_config.get_current_user)
+    db: Session = Depends(database.get_db)
+
 ):
     user = crud.get_user(db, user_id)
     if not user:
